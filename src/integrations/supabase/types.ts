@@ -14,7 +14,114 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      certificates: {
+        Row: {
+          certificate_type: string
+          created_at: string | null
+          created_by: string
+          download_url: string | null
+          event_name: string
+          id: string
+          issue_date: string | null
+          name: string
+          recipient_name: string
+          recipient_user_id: string
+        }
+        Insert: {
+          certificate_type?: string
+          created_at?: string | null
+          created_by: string
+          download_url?: string | null
+          event_name: string
+          id?: string
+          issue_date?: string | null
+          name: string
+          recipient_name: string
+          recipient_user_id: string
+        }
+        Update: {
+          certificate_type?: string
+          created_at?: string | null
+          created_by?: string
+          download_url?: string | null
+          event_name?: string
+          id?: string
+          issue_date?: string | null
+          name?: string
+          recipient_name?: string
+          recipient_user_id?: string
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          deadline: string | null
+          description: string | null
+          id: string
+          name: string
+          registration_link: string | null
+          rules: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          registration_link?: string | null
+          rules?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          registration_link?: string | null
+          rules?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string
+          full_name: string | null
+          id: string
+          role: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
