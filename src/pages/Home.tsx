@@ -13,7 +13,7 @@ const Home = () => {
               <Calendar className="h-8 w-8 text-primary" />
               <span className="text-xl font-semibold text-text-primary">EventHub</span>
             </div>
-            <Link to="/login">
+            <Link to="/auth">
               <Button variant="outline" size="sm">
                 Sign In
               </Button>
@@ -34,7 +34,7 @@ const Home = () => {
             Create, manage, and track events with ease.
           </p>
           
-          <Link to="/login">
+          <Link to="/auth">
             <Button size="lg" className="bg-gradient-primary hover:shadow-glow transition-all duration-300">
               Get Started
               <ArrowRight className="ml-2 h-5 w-5" />

@@ -1,19 +1,21 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Calendar, Plus, Award, LogOut, Home } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { signOut, isAdmin, profile } = useAuth();
 
-  const handleLogout = () => {
-    // In a real app, handle logout logic here
+  const handleLogout = async () => {
+    await signOut();
     navigate("/");
   };
 
   const navItems = [
     { path: "/dashboard", label: "Dashboard", icon: Home },
-    { path: "/add-event", label: "Add Event", icon: Plus },
+    ...(isAdmin ? [{ path: "/add-event", label: "Add Event", icon: Plus }] : []),
     { path: "/certificates", label: "Certificates", icon: Award },
   ];
 
@@ -45,10 +47,17 @@ const Navigation = () => {
           })}
         </div>
 
-        <Button variant="outline" size="sm" onClick={handleLogout}>
-          <LogOut className="h-4 w-4 mr-2" />
-          Logout
-        </Button>
+        <div className="flex items-center space-x-3">
+          {profile && (
+            <span className="text-sm text-text-secondary">
+              Welcome, {profile.full_name || 'User'} ({profile.role})
+            </span>
+          )}
+          <Button variant="outline" size="sm" onClick={handleLogout}>
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
+        </div>
       </div>
     </nav>
   );

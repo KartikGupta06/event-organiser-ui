@@ -1,39 +1,61 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Plus, Calendar, Clock, ExternalLink, Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
-import { Plus, Calendar, Users, ExternalLink, Clock } from "lucide-react";
-
-// Mock data - in a real app, this would come from an API
-const events = [
-  {
-    id: 1,
-    name: "Tech Conference 2024",
-    description: "Annual technology conference featuring the latest innovations in AI, cloud computing, and software development.",
-    registrationLink: "https://techconf2024.com/register",
-    deadline: "2024-03-15",
-    status: "active",
-  },
-  {
-    id: 2,
-    name: "Design Workshop Series",
-    description: "Interactive workshop series covering UI/UX design principles, prototyping, and design thinking methodologies.",
-    registrationLink: "https://designworkshop.com/signup",
-    deadline: "2024-02-28",
-    status: "active",
-  },
-  {
-    id: 3,
-    name: "Startup Pitch Competition",
-    description: "Competitive event for early-stage startups to pitch their ideas to investors and industry experts.",
-    registrationLink: "https://startuppitch.com/apply",
-    deadline: "2024-02-20",
-    status: "closing_soon",
-  },
-];
+import { useEvents } from "@/hooks/useEvents";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
+  const { events, loading } = useEvents();
+  const { isAdmin } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-surface">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate statistics
+  const totalEvents = events.length;
+  const activeEvents = events.filter(event => event.status === 'active').length;
+  const upcomingDeadlines = events.filter(event => {
+    if (!event.deadline) return false;
+    const deadline = new Date(event.deadline);
+    const now = new Date();
+    const diffDays = (deadline.getTime() - now.getTime()) / (1000 * 3600 * 24);
+    return diffDays <= 7 && diffDays > 0;
+  }).length;
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-success text-success-foreground';
+      case 'completed':
+        return 'bg-muted text-muted-foreground';
+      case 'inactive':
+        return 'bg-warning text-warning-foreground';
+      default:
+        return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const formatDeadline = (deadline?: string) => {
+    if (!deadline) return 'No deadline';
+    return new Date(deadline).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-surface">
       <Navigation />
@@ -43,119 +65,122 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-text-primary mb-2">Event Dashboard</h1>
-            <p className="text-text-secondary">Manage your events and track registrations</p>
+            <p className="text-text-secondary">
+              {isAdmin ? 'Manage your events and track participation' : 'Browse available events and register'}
+            </p>
           </div>
-          
-          <Link to="/add-event">
-            <Button className="bg-gradient-primary hover:shadow-glow transition-all duration-300">
-              <Plus className="h-4 w-4 mr-2" />
-              Add New Event
-            </Button>
-          </Link>
+          {isAdmin && (
+            <Link to="/add-event">
+              <Button size="lg" className="bg-gradient-primary hover:shadow-glow">
+                <Plus className="h-5 w-5 mr-2" />
+                Add New Event
+              </Button>
+            </Link>
+          )}
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card className="border-border shadow hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-text-secondary">Total Events</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center space-x-2">
-                <Calendar className="h-5 w-5 text-primary" />
-                <span className="text-2xl font-bold text-text-primary">{events.length}</span>
-              </div>
+              <div className="text-2xl font-bold text-text-primary">{totalEvents}</div>
             </CardContent>
           </Card>
-
-          <Card className="border-border shadow hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
+          
+          <Card>
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-text-secondary">Active Events</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center space-x-2">
-                <Users className="h-5 w-5 text-success" />
-                <span className="text-2xl font-bold text-text-primary">
-                  {events.filter(e => e.status === "active").length}
-                </span>
-              </div>
+              <div className="text-2xl font-bold text-text-primary">{activeEvents}</div>
             </CardContent>
           </Card>
-
-          <Card className="border-border shadow hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
+          
+          <Card>
+            <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-text-secondary">Closing Soon</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center space-x-2">
-                <Clock className="h-5 w-5 text-warning" />
-                <span className="text-2xl font-bold text-text-primary">
-                  {events.filter(e => e.status === "closing_soon").length}
-                </span>
-              </div>
+              <div className="text-2xl font-bold text-text-primary">{upcomingDeadlines}</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Events List */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold text-text-primary">Your Events</h2>
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-text-primary mb-4">
+            {events.length > 0 ? 'Events' : 'No Events Available'}
+          </h2>
           
           {events.length === 0 ? (
-            <Card className="border-border shadow">
+            <Card>
               <CardContent className="text-center py-12">
-                <Calendar className="h-12 w-12 text-text-tertiary mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-text-primary mb-2">No events yet</h3>
-                <p className="text-text-secondary mb-4">Get started by creating your first event</p>
-                <Link to="/add-event">
-                  <Button className="bg-gradient-primary hover:shadow-glow transition-all duration-300">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Event
-                  </Button>
-                </Link>
+                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-text-primary mb-2">No events found</h3>
+                <p className="text-text-secondary mb-4">
+                  {isAdmin 
+                    ? "Get started by creating your first event." 
+                    : "No events are currently available. Check back later."
+                  }
+                </p>
+                {isAdmin && (
+                  <Link to="/add-event">
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Your First Event
+                    </Button>
+                  </Link>
+                )}
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-6">
-              {events.map((event) => (
-                <Card key={event.id} className="border-border shadow hover:shadow-lg transition-all duration-300">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-text-primary mb-2">{event.name}</CardTitle>
-                        <CardDescription className="text-text-secondary">
-                          {event.description}
-                        </CardDescription>
+            events.map((event) => (
+              <Card key={event.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-xl font-semibold text-text-primary">{event.name}</h3>
+                        <Badge className={getStatusColor(event.status)}>
+                          {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                        </Badge>
                       </div>
-                      <Badge 
-                        variant={event.status === "active" ? "default" : "secondary"}
-                        className={event.status === "closing_soon" ? "bg-warning text-warning-foreground" : ""}
-                      >
-                        {event.status === "active" ? "Active" : "Closing Soon"}
-                      </Badge>
+                      {event.description && (
+                        <p className="text-text-secondary">{event.description}</p>
+                      )}
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm text-text-secondary">
-                        <p>Deadline: {new Date(event.deadline).toLocaleDateString()}</p>
+                  </div>
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4 text-sm text-text-secondary">
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span>Deadline: {formatDeadline(event.deadline)}</span>
                       </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(event.registrationLink, "_blank")}
+                    </div>
+                    
+                    {event.registration_link && (
+                      <Button variant="outline" size="sm" asChild>
+                        <a 
+                          href={event.registration_link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center"
                         >
                           <ExternalLink className="h-4 w-4 mr-2" />
-                          Registration Link
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                          Register
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))
           )}
         </div>
       </main>

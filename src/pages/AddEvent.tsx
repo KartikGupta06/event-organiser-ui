@@ -1,15 +1,20 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, ArrowLeft, Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
-import { Calendar, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useEvents } from "@/hooks/useEvents";
 
 const AddEvent = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { createEvent } = useEvents();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -17,9 +22,6 @@ const AddEvent = () => {
     deadline: "",
     registrationLink: "",
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -31,27 +33,52 @@ const AddEvent = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Basic validation
-    if (!formData.name || !formData.description || !formData.deadline || !formData.registrationLink) {
+    if (!formData.name.trim()) {
       toast({
-        title: "Error",
-        description: "Please fill in all required fields",
+        title: "Validation Error",
+        description: "Event name is required.",
         variant: "destructive",
       });
       return;
     }
 
-    setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+    setLoading(true);
+    try {
+      const eventData = {
+        name: formData.name.trim(),
+        description: formData.description.trim() || null,
+        rules: formData.rules.trim() || null,
+        deadline: formData.deadline ? new Date(formData.deadline).toISOString() : null,
+        registration_link: formData.registrationLink.trim() || null,
+        status: "active" as const,
+      };
+
+      const { error } = await createEvent(eventData);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error,
+          variant: "destructive",
+        });
+        return;
+      }
+
       toast({
         title: "Success",
         description: "Event created successfully!",
       });
+      
       navigate("/dashboard");
-    }, 1000);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create event",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -173,9 +200,16 @@ const AddEvent = () => {
                 <Button
                   type="submit"
                   className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
-                  disabled={isLoading}
+                  disabled={loading}
                 >
-                  {isLoading ? "Creating Event..." : "Create Event"}
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Event"
+                  )}
                 </Button>
               </div>
             </form>
