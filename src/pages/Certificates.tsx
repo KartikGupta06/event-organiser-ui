@@ -2,80 +2,68 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import Navigation from "@/components/Navigation";
-import { Download, Award, Search, Filter } from "lucide-react";
+import CertificateAssignmentForm from "@/components/CertificateAssignmentForm";
+import { Download, Award, Search, Filter, Plus, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-
-// Mock certificate data
-const certificates = [
-  {
-    id: 1,
-    name: "Tech Conference 2024 - Participation Certificate",
-    eventName: "Tech Conference 2024",
-    recipientName: "John Doe",
-    issueDate: "2024-01-15",
-    type: "participation",
-    downloadUrl: "#",
-  },
-  {
-    id: 2,
-    name: "Design Workshop - Completion Certificate",
-    eventName: "Design Workshop Series",
-    recipientName: "Jane Smith",
-    issueDate: "2024-01-20",
-    type: "completion",
-    downloadUrl: "#",
-  },
-  {
-    id: 3,
-    name: "Startup Pitch - Winner Certificate",
-    eventName: "Startup Pitch Competition",
-    recipientName: "Alex Johnson",
-    issueDate: "2024-02-05",
-    type: "achievement",
-    downloadUrl: "#",
-  },
-  {
-    id: 4,
-    name: "Innovation Summit - Speaker Certificate",
-    eventName: "Innovation Summit 2024",
-    recipientName: "Sarah Wilson",
-    issueDate: "2024-02-10",
-    type: "speaker",
-    downloadUrl: "#",
-  },
-];
+import { useCertificates } from "@/hooks/useCertificates";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Certificates = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
+  const [showAssignmentForm, setShowAssignmentForm] = useState(false);
+  
   const { toast } = useToast();
+  const { certificates, loading, error, downloadCertificate, fetchCertificates } = useCertificates();
+  const { isAdmin } = useAuth();
 
   const filteredCertificates = certificates.filter(cert => {
     const matchesSearch = cert.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         cert.eventName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         cert.recipientName.toLowerCase().includes(searchTerm.toLowerCase());
+                         cert.event_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         cert.recipient_name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesFilter = filter === "all" || cert.type === filter;
+    const matchesFilter = filter === "all" || cert.certificate_type === filter;
     
     return matchesSearch && matchesFilter;
   });
 
-  const handleDownload = (certificate: typeof certificates[0]) => {
-    // Simulate certificate download
-    toast({
-      title: "Download Started",
-      description: `Downloading ${certificate.name}`,
-    });
+  const handleDownload = async (certificate: typeof certificates[0]) => {
+    if (!certificate.download_url) {
+      toast({
+        title: "No file available",
+        description: "This certificate doesn't have a downloadable file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const fileName = certificate.download_url.split('/').pop() || '';
+      const { error } = await downloadCertificate(certificate.id, fileName);
+      
+      if (error) throw new Error(error);
+      
+      toast({
+        title: "Download Started",
+        description: `Downloading ${certificate.name}`,
+      });
+    } catch (err: any) {
+      toast({
+        title: "Download Failed",
+        description: err.message || "Failed to download certificate",
+        variant: "destructive",
+      });
+    }
   };
 
   const getCertificateTypeColor = (type: string) => {
     const colors = {
       participation: "bg-primary text-primary-foreground",
-      completion: "bg-success text-success-foreground",
-      achievement: "bg-warning text-warning-foreground",
-      speaker: "bg-destructive text-destructive-foreground",
+      completion: "bg-green-600 text-white",
+      achievement: "bg-yellow-600 text-white",
     };
     return colors[type as keyof typeof colors] || "bg-secondary text-secondary-foreground";
   };
@@ -85,10 +73,40 @@ const Certificates = () => {
       participation: "Participation",
       completion: "Completion",
       achievement: "Achievement",
-      speaker: "Speaker",
     };
     return labels[type as keyof typeof labels] || type;
   };
+
+  const handleAssignmentSuccess = () => {
+    fetchCertificates();
+    setShowAssignmentForm(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-surface">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-surface">
+        <Navigation />
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <Card className="border-destructive">
+            <CardContent className="text-center py-12">
+              <p className="text-destructive">Error loading certificates: {error}</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-surface">
@@ -97,8 +115,31 @@ const Certificates = () => {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-text-primary mb-2">Certificate Vault</h1>
-          <p className="text-text-secondary">Manage and download event certificates</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-text-primary mb-2">Certificate Vault</h1>
+              <p className="text-text-secondary">
+                {isAdmin ? "Manage and assign event certificates" : "View and download your certificates"}
+              </p>
+            </div>
+            
+            {isAdmin && (
+              <Dialog open={showAssignmentForm} onOpenChange={setShowAssignmentForm}>
+                <DialogTrigger asChild>
+                  <Button className="bg-gradient-primary hover:shadow-glow transition-all duration-300">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Assign Certificate
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl">
+                  <CertificateAssignmentForm
+                    onClose={() => setShowAssignmentForm(false)}
+                    onSuccess={handleAssignmentSuccess}
+                  />
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         </div>
 
         {/* Search and Filter */}
@@ -169,7 +210,7 @@ const Certificates = () => {
                   <div>
                     <p className="text-sm text-text-secondary capitalize">{type}</p>
                     <p className="text-2xl font-bold text-text-primary">
-                      {certificates.filter(c => c.type === type).length}
+                      {certificates.filter(c => c.certificate_type === type).length}
                     </p>
                   </div>
                 </div>
@@ -187,7 +228,12 @@ const Certificates = () => {
                 {searchTerm ? "No certificates found" : "No certificates yet"}
               </h3>
               <p className="text-text-secondary">
-                {searchTerm ? "Try adjusting your search terms" : "Certificates will appear here as events are completed"}
+                {searchTerm 
+                  ? "Try adjusting your search terms" 
+                  : isAdmin 
+                    ? "Use the 'Assign Certificate' button to create certificates" 
+                    : "Certificates will appear here as events are completed"
+                }
               </p>
             </CardContent>
           </Card>
@@ -203,11 +249,11 @@ const Certificates = () => {
                         <CardTitle className="text-text-primary">{certificate.name}</CardTitle>
                       </div>
                       <CardDescription className="text-text-secondary">
-                        Event: {certificate.eventName}
+                        Event: {certificate.event_name}
                       </CardDescription>
                     </div>
-                    <Badge className={getCertificateTypeColor(certificate.type)}>
-                      {getCertificateTypeLabel(certificate.type)}
+                    <Badge className={getCertificateTypeColor(certificate.certificate_type)}>
+                      {getCertificateTypeLabel(certificate.certificate_type)}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -216,16 +262,17 @@ const Certificates = () => {
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <p className="text-sm text-text-secondary">
-                        <strong>Recipient:</strong> {certificate.recipientName}
+                        <strong>Recipient:</strong> {certificate.recipient_name}
                       </p>
                       <p className="text-sm text-text-secondary">
-                        <strong>Issued:</strong> {new Date(certificate.issueDate).toLocaleDateString()}
+                        <strong>Issued:</strong> {new Date(certificate.issue_date).toLocaleDateString()}
                       </p>
                     </div>
                     
                     <Button
                       onClick={() => handleDownload(certificate)}
-                      className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
+                      disabled={!certificate.download_url}
+                      className="bg-gradient-primary hover:shadow-glow transition-all duration-300 disabled:opacity-50"
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download

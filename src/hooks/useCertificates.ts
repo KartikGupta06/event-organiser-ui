@@ -69,6 +69,59 @@ export const useCertificates = () => {
     }
   };
 
+  const uploadCertificateFile = async (file: File, userId: string, certificateId: string) => {
+    if (!session?.user) throw new Error('User not authenticated');
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userId}/${certificateId}.${fileExt}`;
+      
+      const { data, error } = await supabase.storage
+        .from('certificates')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('certificates')
+        .getPublicUrl(fileName);
+
+      return { data: { path: data.path, publicUrl }, error: null };
+    } catch (err: any) {
+      return { data: null, error: err.message };
+    }
+  };
+
+  const downloadCertificate = async (certificateId: string, fileName: string) => {
+    if (!session?.user) throw new Error('User not authenticated');
+    
+    try {
+      const { data, error } = await supabase.storage
+        .from('certificates')
+        .download(fileName);
+
+      if (error) throw error;
+
+      // Create download link
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `certificate-${certificateId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      return { error: null };
+    } catch (err: any) {
+      return { error: err.message };
+    }
+  };
+
   useEffect(() => {
     if (session) {
       fetchCertificates();
@@ -81,5 +134,7 @@ export const useCertificates = () => {
     error,
     fetchCertificates,
     createCertificate,
+    uploadCertificateFile,
+    downloadCertificate,
   };
 };
