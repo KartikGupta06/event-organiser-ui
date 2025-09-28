@@ -240,7 +240,7 @@ const CertificateAssignmentForm: React.FC<CertificateAssignmentFormProps> = ({ o
           {/* File Upload */}
           <div className="space-y-2">
             <Label htmlFor="file">Certificate File (PDF) *</Label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <div className="relative border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
               {certificateFile ? (
                 <div className="flex items-center justify-center space-x-2">
                   <span className="text-sm text-green-600">✓ {certificateFile.name}</span>
