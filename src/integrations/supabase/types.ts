@@ -53,6 +53,83 @@ export type Database = {
         }
         Relationships: []
       }
+      email_notifications: {
+        Row: {
+          created_at: string
+          email_type: string
+          error_message: string | null
+          event_id: string | null
+          id: string
+          recipient_email: string
+          recipient_user_id: string | null
+          sent_at: string
+          status: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email_type: string
+          error_message?: string | null
+          event_id?: string | null
+          id?: string
+          recipient_email: string
+          recipient_user_id?: string | null
+          sent_at?: string
+          status?: string
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email_type?: string
+          error_message?: string | null
+          event_id?: string | null
+          id?: string
+          recipient_email?: string
+          recipient_user_id?: string | null
+          sent_at?: string
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
+      event_registrations: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          registered_at: string
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          registered_at?: string
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          registered_at?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_event_registrations_event_id"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string | null
@@ -96,6 +173,8 @@ export type Database = {
         Row: {
           created_at: string | null
           email: string
+          email_notifications: boolean
+          event_reminders: boolean
           full_name: string | null
           id: string
           role: string
@@ -105,6 +184,8 @@ export type Database = {
         Insert: {
           created_at?: string | null
           email: string
+          email_notifications?: boolean
+          event_reminders?: boolean
           full_name?: string | null
           id?: string
           role?: string
@@ -114,6 +195,8 @@ export type Database = {
         Update: {
           created_at?: string | null
           email?: string
+          email_notifications?: boolean
+          event_reminders?: boolean
           full_name?: string | null
           id?: string
           role?: string

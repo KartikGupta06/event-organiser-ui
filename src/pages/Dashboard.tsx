@@ -7,6 +7,8 @@ import { Plus, Calendar, Clock, ExternalLink, Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { useEvents } from "@/hooks/useEvents";
 import { useAuth } from "@/contexts/AuthContext";
+import { EventRegistrationButton } from "@/components/EventRegistrationButton";
+import { EmailNotificationsDashboard } from "@/components/EmailNotificationsDashboard";
 
 const Dashboard = () => {
   const { events, loading } = useEvents();
@@ -109,6 +111,13 @@ const Dashboard = () => {
           </Card>
         </div>
 
+        {/* Email Notifications Dashboard for Admins */}
+        {isAdmin && (
+          <div className="mb-8">
+            <EmailNotificationsDashboard />
+          </div>
+        )}
+
         {/* Events List */}
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-text-primary mb-4">
@@ -164,19 +173,27 @@ const Dashboard = () => {
                       </div>
                     </div>
                     
-                    {event.registration_link && (
-                      <Button variant="outline" size="sm" asChild>
-                        <a 
-                          href={event.registration_link} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center"
-                        >
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          Register
-                        </a>
-                      </Button>
-                    )}
+                    <div className="flex items-center space-x-2">
+                      <EventRegistrationButton 
+                        eventId={event.id}
+                        eventName={event.name}
+                        eventDescription={event.description}
+                        eventDeadline={event.deadline}
+                      />
+                      {event.registration_link && (
+                        <Button variant="outline" size="sm" asChild>
+                          <a 
+                            href={event.registration_link} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center"
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            External Link
+                          </a>
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

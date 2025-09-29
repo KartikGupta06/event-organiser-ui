@@ -57,6 +57,24 @@ export const useEvents = () => {
 
       if (error) throw error;
 
+      // Send new event notification to all students
+      try {
+        await supabase.functions.invoke('send-event-notification', {
+          body: {
+            type: 'new_event',
+            eventId: data.id,
+            eventName: data.name,
+            eventDescription: data.description,
+            eventDeadline: data.deadline,
+            registrationLink: data.registration_link,
+          },
+        });
+        console.log('New event notification sent successfully');
+      } catch (emailError) {
+        console.error('Failed to send event notification:', emailError);
+        // Don't fail the event creation if email fails
+      }
+
       await fetchEvents(); // Refresh the events list
       return { data, error: null };
     } catch (err: any) {
