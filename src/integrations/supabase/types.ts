@@ -171,35 +171,53 @@ export type Database = {
       }
       profiles: {
         Row: {
+          academic_year: string | null
+          bio: string | null
+          branch: string | null
           created_at: string | null
           email: string
           email_notifications: boolean
           event_reminders: boolean
           full_name: string | null
           id: string
+          phone_number: string | null
+          profile_picture_url: string | null
           role: string
+          roll_number: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          academic_year?: string | null
+          bio?: string | null
+          branch?: string | null
           created_at?: string | null
           email: string
           email_notifications?: boolean
           event_reminders?: boolean
           full_name?: string | null
           id?: string
+          phone_number?: string | null
+          profile_picture_url?: string | null
           role?: string
+          roll_number?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          academic_year?: string | null
+          bio?: string | null
+          branch?: string | null
           created_at?: string | null
           email?: string
           email_notifications?: boolean
           event_reminders?: boolean
           full_name?: string | null
           id?: string
+          phone_number?: string | null
+          profile_picture_url?: string | null
           role?: string
+          roll_number?: string | null
           updated_at?: string | null
           user_id?: string
         }

@@ -8,6 +8,14 @@ interface Profile {
   email: string;
   full_name?: string;
   role: 'admin' | 'student';
+  profile_picture_url?: string;
+  branch?: string;
+  roll_number?: string;
+  academic_year?: string;
+  phone_number?: string;
+  bio?: string;
+  email_notifications: boolean;
+  event_reminders: boolean;
   created_at: string;
   updated_at: string;
 }
