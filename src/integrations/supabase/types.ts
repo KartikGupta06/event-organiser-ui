@@ -92,32 +92,88 @@ export type Database = {
         }
         Relationships: []
       }
-      event_registrations: {
+      event_custom_forms: {
         Row: {
           created_at: string
           event_id: string
+          form_schema: Json
           id: string
-          registered_at: string
-          status: string
-          student_id: string
+          is_required: boolean
           updated_at: string
         }
         Insert: {
           created_at?: string
           event_id: string
+          form_schema: Json
           id?: string
-          registered_at?: string
-          status?: string
-          student_id: string
+          is_required?: boolean
           updated_at?: string
         }
         Update: {
           created_at?: string
           event_id?: string
+          form_schema?: Json
+          id?: string
+          is_required?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_custom_forms_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_registrations: {
+        Row: {
+          additional_data: Json | null
+          created_at: string
+          event_id: string
+          id: string
+          registered_at: string
+          status: string
+          student_academic_year: string | null
+          student_branch: string | null
+          student_email: string | null
+          student_full_name: string | null
+          student_id: string
+          student_phone: string | null
+          student_roll_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          additional_data?: Json | null
+          created_at?: string
+          event_id: string
           id?: string
           registered_at?: string
           status?: string
+          student_academic_year?: string | null
+          student_branch?: string | null
+          student_email?: string | null
+          student_full_name?: string | null
+          student_id: string
+          student_phone?: string | null
+          student_roll_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          additional_data?: Json | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          registered_at?: string
+          status?: string
+          student_academic_year?: string | null
+          student_branch?: string | null
+          student_email?: string | null
+          student_full_name?: string | null
           student_id?: string
+          student_phone?: string | null
+          student_roll_number?: string | null
           updated_at?: string
         }
         Relationships: [

@@ -4,6 +4,7 @@ import { useEventRegistrations } from '@/hooks/useEventRegistrations';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { EventRegistrationModal } from './EventRegistrationModal';
 
 interface EventRegistrationButtonProps {
   eventId: string;
@@ -19,12 +20,13 @@ export const EventRegistrationButton = ({
   eventDeadline 
 }: EventRegistrationButtonProps) => {
   const [loading, setLoading] = useState(false);
-  const { registerForEvent, unregisterFromEvent, isRegistered } = useEventRegistrations();
+  const [showModal, setShowModal] = useState(false);
+  const { unregisterFromEvent, isRegistered, fetchRegistrations } = useEventRegistrations();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const registered = isRegistered(eventId);
 
-  const handleRegistration = async () => {
+  const handleRegistrationClick = () => {
     if (!user || !profile) {
       toast({
         title: "Authentication Required",
@@ -43,46 +45,26 @@ export const EventRegistrationButton = ({
       return;
     }
 
+    if (registered) {
+      handleUnregister();
+    } else {
+      setShowModal(true);
+    }
+  };
+
+  const handleUnregister = async () => {
     setLoading(true);
-
     try {
-      if (registered) {
-        const { error } = await unregisterFromEvent(eventId);
-        if (error) throw new Error(error);
-        
-        toast({
-          title: "Unregistered Successfully",
-          description: `You have been unregistered from ${eventName}`,
-        });
-      } else {
-        const { error } = await registerForEvent(eventId);
-        if (error) throw new Error(error);
-
-        // Send registration confirmation email
-        try {
-          await supabase.functions.invoke('send-event-notification', {
-            body: {
-              type: 'registration_confirmation',
-              eventId,
-              eventName,
-              eventDescription,
-              eventDeadline,
-              recipientEmail: user.email,
-              recipientUserId: user.id,
-            },
-          });
-        } catch (emailError) {
-          console.error('Failed to send confirmation email:', emailError);
-        }
-        
-        toast({
-          title: "Registered Successfully",
-          description: `You have been registered for ${eventName}. Check your email for confirmation.`,
-        });
-      }
+      const { error } = await unregisterFromEvent(eventId);
+      if (error) throw new Error(error);
+      
+      toast({
+        title: "Unregistered Successfully",
+        description: `You have been unregistered from ${eventName}`,
+      });
     } catch (error: any) {
       toast({
-        title: "Registration Failed",
+        title: "Unregistration Failed",
         description: error.message,
         variant: "destructive",
       });
@@ -91,25 +73,61 @@ export const EventRegistrationButton = ({
     }
   };
 
+  const handleRegistrationSuccess = async () => {
+    await fetchRegistrations();
+    
+    // Send registration confirmation email
+    try {
+      await supabase.functions.invoke('send-event-notification', {
+        body: {
+          type: 'registration_confirmation',
+          eventId,
+          eventName,
+          eventDescription,
+          eventDeadline,
+          recipientEmail: user?.email,
+          recipientUserId: user?.id,
+        },
+      });
+    } catch (emailError) {
+      console.error('Failed to send confirmation email:', emailError);
+    }
+
+    toast({
+      title: "Registered Successfully",
+      description: `You have been registered for ${eventName}. Check your email for confirmation.`,
+    });
+  };
+
   // Don't show registration button for non-students
   if (!profile || profile.role !== 'student') {
     return null;
   }
 
   return (
-    <Button
-      onClick={handleRegistration}
-      disabled={loading}
-      variant={registered ? "outline" : "default"}
-      className="w-full sm:w-auto"
-    >
-      {loading ? (
-        "Processing..."
-      ) : registered ? (
-        "Unregister"
-      ) : (
-        "Register for Event"
-      )}
-    </Button>
+    <>
+      <Button
+        onClick={handleRegistrationClick}
+        disabled={loading}
+        variant={registered ? "outline" : "default"}
+        className="w-full sm:w-auto"
+      >
+        {loading ? (
+          "Processing..."
+        ) : registered ? (
+          "Unregister"
+        ) : (
+          "Register for Event"
+        )}
+      </Button>
+
+      <EventRegistrationModal
+        open={showModal}
+        onOpenChange={setShowModal}
+        eventId={eventId}
+        eventName={eventName}
+        onSuccess={handleRegistrationSuccess}
+      />
+    </>
   );
 };

@@ -6,9 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, ArrowLeft, Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useEvents } from "@/hooks/useEvents";
+import { CustomFormBuilder, type FormSchema } from "@/components/CustomFormBuilder";
+import { supabase } from "@/integrations/supabase/client";
 
 const AddEvent = () => {
   const navigate = useNavigate();
@@ -22,6 +25,10 @@ const AddEvent = () => {
     deadline: "",
     registrationLink: "",
   });
+
+  const [customFormEnabled, setCustomFormEnabled] = useState(false);
+  const [customFormSchema, setCustomFormSchema] = useState<FormSchema>({ fields: [] });
+  const [customFormRequired, setCustomFormRequired] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -53,7 +60,7 @@ const AddEvent = () => {
         status: "active" as const,
       };
 
-      const { error } = await createEvent(eventData);
+      const { data: eventResult, error } = await createEvent(eventData);
 
       if (error) {
         toast({
@@ -62,6 +69,26 @@ const AddEvent = () => {
           variant: "destructive",
         });
         return;
+      }
+
+      // If custom form is enabled, save it
+      if (customFormEnabled && eventResult && customFormSchema.fields.length > 0) {
+        const { error: formError } = await supabase
+          .from('event_custom_forms')
+          .insert([{
+            event_id: eventResult.id,
+            form_schema: customFormSchema as any,
+            is_required: customFormRequired,
+          }]);
+
+        if (formError) {
+          console.error('Error saving custom form:', formError);
+          toast({
+            title: "Warning",
+            description: "Event created but custom form could not be saved.",
+            variant: "destructive",
+          });
+        }
       }
 
       toast({
@@ -176,16 +203,49 @@ const AddEvent = () => {
               {/* Registration Link */}
               <div className="space-y-2">
                 <Label htmlFor="registrationLink" className="text-text-primary">
-                  Registration Link <span className="text-destructive">*</span>
+                  Registration Link
                 </Label>
                 <Input
                   id="registrationLink"
                   type="url"
-                  placeholder="https://example.com/register"
+                  placeholder="https://example.com/register (optional)"
                   value={formData.registrationLink}
                   onChange={(e) => handleInputChange("registrationLink", e.target.value)}
                   className="border-border focus:ring-primary"
                 />
+              </div>
+
+              {/* Custom Form Toggle */}
+              <div className="border-t border-border pt-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label>Enable Custom Registration Form</Label>
+                    <p className="text-sm text-text-secondary">
+                      Add additional fields for students to fill during registration
+                    </p>
+                  </div>
+                  <Switch
+                    checked={customFormEnabled}
+                    onCheckedChange={setCustomFormEnabled}
+                  />
+                </div>
+
+                {customFormEnabled && (
+                  <>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        checked={customFormRequired}
+                        onCheckedChange={setCustomFormRequired}
+                      />
+                      <Label>Make custom form required</Label>
+                    </div>
+
+                    <CustomFormBuilder
+                      value={customFormSchema}
+                      onChange={setCustomFormSchema}
+                    />
+                  </>
+                )}
               </div>
 
               {/* Submit Button */}
