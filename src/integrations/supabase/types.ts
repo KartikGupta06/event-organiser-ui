@@ -14,65 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      attendance_records: {
-        Row: {
-          created_at: string
-          event_id: string
-          id: string
-          marked_at: string
-          marked_by: string
-          notes: string | null
-          status: string
-          student_academic_year: string | null
-          student_branch: string | null
-          student_email: string
-          student_full_name: string | null
-          student_id: string
-          student_roll_number: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          event_id: string
-          id?: string
-          marked_at?: string
-          marked_by: string
-          notes?: string | null
-          status?: string
-          student_academic_year?: string | null
-          student_branch?: string | null
-          student_email: string
-          student_full_name?: string | null
-          student_id: string
-          student_roll_number?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          event_id?: string
-          id?: string
-          marked_at?: string
-          marked_by?: string
-          notes?: string | null
-          status?: string
-          student_academic_year?: string | null
-          student_branch?: string | null
-          student_email?: string
-          student_full_name?: string | null
-          student_id?: string
-          student_roll_number?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "attendance_records_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       certificates: {
         Row: {
           certificate_type: string

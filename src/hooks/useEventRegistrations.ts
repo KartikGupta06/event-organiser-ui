@@ -6,13 +6,6 @@ export interface EventRegistration {
   id: string;
   event_id: string;
   student_id: string;
-  student_email: string | null;
-  student_full_name: string | null;
-  student_branch: string | null;
-  student_roll_number: string | null;
-  student_academic_year: string | null;
-  student_phone: string | null;
-  additional_data: any;
   registered_at: string;
   status: 'registered' | 'attended' | 'cancelled';
   created_at: string;

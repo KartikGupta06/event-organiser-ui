@@ -71,17 +71,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Defer profile fetch to avoid deadlock during token refresh
-          setTimeout(() => {
-            fetchProfile(session.user.id).then(profileData => {
-              setProfile(profileData);
-            });
-          }, 0);
+          // Fetch user profile with role
+          const profileData = await fetchProfile(session.user.id);
+          setProfile(profileData);
         } else {
           setProfile(null);
         }
@@ -91,14 +88,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchProfile(session.user.id).then(profileData => {
-          setProfile(profileData);
-        });
+        const profileData = await fetchProfile(session.user.id);
+        setProfile(profileData);
       }
       
       setLoading(false);
