@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Calendar, Plus, Award, LogOut, Home, User as UserIcon } from "lucide-react";
+import { Calendar, Plus, Award, LogOut, Home, User as UserIcon, Users } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Navigation = () => {
@@ -17,6 +17,7 @@ const Navigation = () => {
   const navItems = [
     { path: "/dashboard", label: "Dashboard", icon: Home },
     ...(isAdmin ? [{ path: "/add-event", label: "Add Event", icon: Plus }] : []),
+    { path: "/attendance", label: "Attendance", icon: Users },
     { path: "/certificates", label: "Certificates", icon: Award },
     { path: "/profile", label: "Profile", icon: UserIcon },
   ];
