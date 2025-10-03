@@ -155,3 +155,20 @@ export const useAttendance = (eventId?: string) => {
     deleteAttendance,
   };
 };
+
+export const useStudentAttendance = () => {
+  const { data: myAttendance, isLoading } = useQuery({
+    queryKey: ['my-attendance'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('attendance_records')
+        .select('*, events(name, deadline)')
+        .order('marked_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  return { myAttendance, isLoading };
+};
