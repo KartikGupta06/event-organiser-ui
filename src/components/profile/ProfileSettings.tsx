@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 
 const ProfileSettings = () => {
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [eventReminders, setEventReminders] = useState(true);
@@ -29,6 +29,8 @@ const ProfileSettings = () => {
         .eq('user_id', profile?.user_id);
 
       if (error) throw error;
+
+      await refreshProfile(); // Refresh context state
 
       toast({
         title: 'Settings updated',

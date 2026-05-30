@@ -22,6 +22,7 @@ export const useCertificates = () => {
   const { session, isAdmin } = useAuth();
 
   const fetchCertificates = async () => {
+    console.log('[EventHub Auth] CERTIFICATE FETCH START');
     try {
       setLoading(true);
       
@@ -39,7 +40,8 @@ export const useCertificates = () => {
       setCertificates(data as Certificate[] || []);
       setError(null);
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error fetching certificates:', err);
+      setError(err.message || 'Failed to fetch certificates from vault.');
     } finally {
       setLoading(false);
     }
@@ -125,6 +127,8 @@ export const useCertificates = () => {
   useEffect(() => {
     if (session) {
       fetchCertificates();
+    } else {
+      setLoading(false);
     }
   }, [session, isAdmin]);
 

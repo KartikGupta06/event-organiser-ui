@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { EventRegistrationModal } from './EventRegistrationModal';
+import { Check, Loader2, Sparkles, XCircle } from 'lucide-react';
 
 interface EventRegistrationButtonProps {
   eventId: string;
@@ -30,7 +31,7 @@ export const EventRegistrationButton = ({
     if (!user || !profile) {
       toast({
         title: "Authentication Required",
-        description: "Please log in to register for events",
+        description: "Please register or log in to enroll for this event.",
         variant: "destructive",
       });
       return;
@@ -38,8 +39,8 @@ export const EventRegistrationButton = ({
 
     if (profile.role !== 'student') {
       toast({
-        title: "Students Only",
-        description: "Only students can register for events",
+        title: "Administrative Account Access",
+        description: "Only students are authorized to enroll for live events.",
         variant: "destructive",
       });
       return;
@@ -59,13 +60,13 @@ export const EventRegistrationButton = ({
       if (error) throw new Error(error);
       
       toast({
-        title: "Unregistered Successfully",
-        description: `You have been unregistered from ${eventName}`,
+        title: "Enrollment Cancelled",
+        description: `Successfully cancelled your registration ticket for ${eventName}.`,
       });
     } catch (error: any) {
       toast({
-        title: "Unregistration Failed",
-        description: error.message,
+        title: "Cancellation Failed",
+        description: error.message || "Failed to process unregistration request.",
         variant: "destructive",
       });
     } finally {
@@ -94,8 +95,8 @@ export const EventRegistrationButton = ({
     }
 
     toast({
-      title: "Registered Successfully",
-      description: `You have been registered for ${eventName}. Check your email for confirmation.`,
+      title: "Enrollment Verified!",
+      description: `Your ticket for ${eventName} has been issued. Check your mailbox for ticket details.`,
     });
   };
 
@@ -110,14 +111,29 @@ export const EventRegistrationButton = ({
         onClick={handleRegistrationClick}
         disabled={loading}
         variant={registered ? "outline" : "default"}
-        className="w-full sm:w-auto"
+        className={`w-full sm:w-auto h-10 px-5 rounded-xl font-bold text-xs tracking-wider transition-all duration-300 ${
+          registered 
+            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 group" 
+            : "bg-gradient-primary text-white hover:shadow-glow"
+        }`}
       >
         {loading ? (
-          "Processing..."
+          <span className="flex items-center justify-center gap-1.5">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <span>Processing...</span>
+          </span>
         ) : registered ? (
-          "Unregister"
+          <span className="flex items-center justify-center gap-1.5">
+            <Check className="h-3.5 w-3.5 group-hover:hidden" />
+            <XCircle className="h-3.5 w-3.5 hidden group-hover:block" />
+            <span className="group-hover:hidden">Registered</span>
+            <span className="hidden group-hover:block">Cancel Ticket</span>
+          </span>
         ) : (
-          "Register for Event"
+          <span className="flex items-center justify-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Claim Registration Ticket</span>
+          </span>
         )}
       </Button>
 

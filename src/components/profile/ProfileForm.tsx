@@ -13,7 +13,7 @@ interface ProfileFormProps {
 }
 
 const ProfileForm = ({ type }: ProfileFormProps) => {
-  const { profile } = useAuth();
+  const { profile, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -63,6 +63,8 @@ const ProfileForm = ({ type }: ProfileFormProps) => {
         .eq('user_id', profile?.user_id);
 
       if (error) throw error;
+
+      await refreshProfile(); // Refresh context state
 
       toast({
         title: 'Success',

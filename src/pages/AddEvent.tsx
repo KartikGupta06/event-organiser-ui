@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, ArrowLeft, Loader2 } from "lucide-react";
+import { Calendar, ArrowLeft, Loader2, Sparkles, AlertCircle, FileText, CheckCircle2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import Navigation from "@/components/Navigation";
 import { useToast } from "@/hooks/use-toast";
@@ -43,7 +43,7 @@ const AddEvent = () => {
     if (!formData.name.trim()) {
       toast({
         title: "Validation Error",
-        description: "Event name is required.",
+        description: "Event title name is required.",
         variant: "destructive",
       });
       return;
@@ -85,22 +85,22 @@ const AddEvent = () => {
           console.error('Error saving custom form:', formError);
           toast({
             title: "Warning",
-            description: "Event created but custom form could not be saved.",
+            description: "Event created, but the custom form metadata failed to save.",
             variant: "destructive",
           });
         }
       }
 
       toast({
-        title: "Success",
-        description: "Event created successfully!",
+        title: "Event Created successfully!",
+        description: "Your new event is now listed live on student catalogs.",
       });
       
       navigate("/dashboard");
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to create event",
+        title: "Creation Failed",
+        description: error.message || "Could not publish event.",
         variant: "destructive",
       });
     } finally {
@@ -109,57 +109,58 @@ const AddEvent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-surface">
+    <div className="min-h-screen bg-gradient-surface pb-16">
       <Navigation />
       
-      <main className="max-w-4xl mx-auto px-6 py-8">
-        {/* Header */}
+      <main className="max-w-4xl mx-auto px-6 py-10">
+        {/* Header navigation back */}
         <div className="mb-8">
           <button
             onClick={() => navigate("/dashboard")}
-            className="inline-flex items-center text-text-secondary hover:text-text-primary transition-colors mb-4"
+            className="inline-flex items-center text-sm text-text-secondary hover:text-primary transition-all mb-4 group"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+            Back to dashboard
           </button>
           
-          <h1 className="text-3xl font-bold text-text-primary mb-2">Create New Event</h1>
-          <p className="text-text-secondary">Add a new event to your organizer dashboard</p>
+          <h1 className="text-3xl font-extrabold text-text-primary tracking-tight mb-2">Publish New Event</h1>
+          <p className="text-sm text-text-secondary">Announce a new workspace event, schedule deadlines, and customize registrations.</p>
         </div>
 
-        {/* Form */}
-        <Card className="shadow-lg border-border">
-          <CardHeader>
-            <div className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              <CardTitle className="text-text-primary">Event Details</CardTitle>
+        {/* Core details builder */}
+        <Card className="glass-panel border border-white/50 dark:border-white/10 shadow-2xl rounded-3xl overflow-hidden mb-10">
+          <CardHeader className="border-b border-border/50 pb-4">
+            <div className="flex items-center space-x-2.5">
+              <Calendar className="h-5 w-5 text-primary animate-float" />
+              <div>
+                <CardTitle className="text-base font-bold text-text-primary">Event Specifications</CardTitle>
+                <CardDescription className="text-xs text-text-secondary mt-0.5">Define core attributes, regulations, and ticket parameters.</CardDescription>
+              </div>
             </div>
-            <CardDescription className="text-text-secondary">
-              Fill in the information for your new event
-            </CardDescription>
           </CardHeader>
           
-          <CardContent>
+          <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 gap-5">
                 {/* Event Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-text-primary">
-                    Event Name <span className="text-destructive">*</span>
+                <div className="space-y-1.5">
+                  <Label htmlFor="name" className="text-xs font-bold uppercase tracking-wider text-text-secondary">
+                    Event Title <span className="text-destructive">*</span>
                   </Label>
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Enter event name"
+                    placeholder="e.g. Annual Tech Hackathon"
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
-                    className="border-border focus:ring-primary"
+                    className="h-11 rounded-xl bg-white/50 dark:bg-black/10 border-border/80"
+                    required
                   />
                 </div>
 
                 {/* Deadline */}
-                <div className="space-y-2">
-                  <Label htmlFor="deadline" className="text-text-primary">
+                <div className="space-y-1.5">
+                  <Label htmlFor="deadline" className="text-xs font-bold uppercase tracking-wider text-text-secondary">
                     Registration Deadline <span className="text-destructive">*</span>
                   </Label>
                   <Input
@@ -167,61 +168,63 @@ const AddEvent = () => {
                     type="date"
                     value={formData.deadline}
                     onChange={(e) => handleInputChange("deadline", e.target.value)}
-                    className="border-border focus:ring-primary"
+                    className="h-11 rounded-xl bg-white/50 dark:bg-black/10 border-border/80"
+                    required
                   />
                 </div>
               </div>
 
               {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-text-primary">
-                  Event Description <span className="text-destructive">*</span>
+              <div className="space-y-1.5">
+                <Label htmlFor="description" className="text-xs font-bold uppercase tracking-wider text-text-secondary">
+                  Detailed Description <span className="text-destructive">*</span>
                 </Label>
                 <Textarea
                   id="description"
-                  placeholder="Describe your event..."
+                  placeholder="Provide details about schedules, venues, and registration incentives..."
                   value={formData.description}
                   onChange={(e) => handleInputChange("description", e.target.value)}
-                  className="border-border focus:ring-primary min-h-[100px] resize-none"
+                  className="rounded-xl min-h-[100px] bg-white/50 dark:bg-black/10 border-border/80 resize-none"
+                  required
                 />
               </div>
 
               {/* Rules */}
-              <div className="space-y-2">
-                <Label htmlFor="rules" className="text-text-primary">
-                  Event Rules & Guidelines
+              <div className="space-y-1.5">
+                <Label htmlFor="rules" className="text-xs font-bold uppercase tracking-wider text-text-secondary">
+                  Event Regulations & Code of Conduct
                 </Label>
                 <Textarea
                   id="rules"
-                  placeholder="Enter event rules and guidelines (optional)"
+                  placeholder="Detail eligibility parameters, team size regulations, etc... (optional)"
                   value={formData.rules}
                   onChange={(e) => handleInputChange("rules", e.target.value)}
-                  className="border-border focus:ring-primary min-h-[100px] resize-none"
+                  className="rounded-xl min-h-[100px] bg-white/50 dark:bg-black/10 border-border/80 resize-none"
                 />
               </div>
 
               {/* Registration Link */}
-              <div className="space-y-2">
-                <Label htmlFor="registrationLink" className="text-text-primary">
-                  Registration Link
+              <div className="space-y-1.5">
+                <Label htmlFor="registrationLink" className="text-xs font-bold uppercase tracking-wider text-text-secondary">
+                  External Registration Link (Optional)
                 </Label>
                 <Input
                   id="registrationLink"
                   type="url"
-                  placeholder="https://example.com/register (optional)"
+                  placeholder="e.g. https://forms.gle/tech-hackathon"
                   value={formData.registrationLink}
                   onChange={(e) => handleInputChange("registrationLink", e.target.value)}
-                  className="border-border focus:ring-primary"
+                  className="h-11 rounded-xl bg-white/50 dark:bg-black/10 border-border/80"
                 />
               </div>
 
               {/* Custom Form Toggle */}
-              <div className="border-t border-border pt-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label>Enable Custom Registration Form</Label>
-                    <p className="text-sm text-text-secondary">
-                      Add additional fields for students to fill during registration
+              <div className="border-t border-border/50 pt-6 space-y-4">
+                <div className="flex items-center justify-between p-4 bg-secondary/35 dark:bg-card/45 border border-border/80 rounded-2xl">
+                  <div className="space-y-0.5">
+                    <Label className="text-sm font-bold text-text-primary">Enable Custom Questionnaires</Label>
+                    <p className="text-xs text-text-secondary leading-relaxed max-w-md">
+                      Add custom fields (T-shirt sizes, experience levels, etc.) that student participants must complete.
                     </p>
                   </div>
                   <Switch
@@ -231,44 +234,51 @@ const AddEvent = () => {
                 </div>
 
                 {customFormEnabled && (
-                  <>
-                    <div className="flex items-center space-x-2">
+                  <div className="space-y-4 pt-2">
+                    <div className="flex items-center space-x-3 p-3 bg-secondary/30 dark:bg-card/30 rounded-xl border border-border/50">
                       <Switch
                         checked={customFormRequired}
                         onCheckedChange={setCustomFormRequired}
+                        id="custom-req"
                       />
-                      <Label>Make custom form required</Label>
+                      <Label htmlFor="custom-req" className="text-xs font-semibold text-text-primary cursor-pointer">
+                        Mark the questionnaire as mandatory for enrollment completion.
+                      </Label>
                     </div>
 
                     <CustomFormBuilder
                       value={customFormSchema}
                       onChange={setCustomFormSchema}
                     />
-                  </>
+                  </div>
                 )}
               </div>
 
-              {/* Submit Button */}
-              <div className="flex items-center justify-end space-x-4 pt-4">
+              {/* Submit Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-6 border-t border-border/50">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => navigate("/dashboard")}
+                  className="rounded-xl h-11 px-5 text-xs font-bold"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
+                  className="bg-gradient-primary hover:shadow-glow text-white rounded-xl h-11 px-6 text-xs font-bold"
                   disabled={loading}
                 >
                   {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
+                    <span className="flex items-center gap-1.5">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Publishing event...
+                    </span>
                   ) : (
-                    "Create Event"
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="h-4 w-4" />
+                      Publish Event live
+                    </span>
                   )}
                 </Button>
               </div>
@@ -276,31 +286,37 @@ const AddEvent = () => {
           </CardContent>
         </Card>
 
-        {/* Preview Card */}
+        {/* Live dynamic preview card displaying real dashboard styling */}
         {(formData.name || formData.description) && (
-          <Card className="mt-8 border-border shadow">
-            <CardHeader>
-              <CardTitle className="text-text-primary">Preview</CardTitle>
-              <CardDescription className="text-text-secondary">
-                This is how your event will appear on the dashboard
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-text-primary">
-                  {formData.name || "Event Name"}
-                </h3>
-                <p className="text-text-secondary">
-                  {formData.description || "Event description will appear here"}
-                </p>
-                {formData.deadline && (
-                  <p className="text-sm text-text-secondary">
-                    Deadline: {new Date(formData.deadline).toLocaleDateString()}
+          <div className="space-y-4">
+            <h3 className="text-base font-bold text-text-primary tracking-tight">Dashboard Card Preview</h3>
+            <Card className="glass-card p-6 relative overflow-hidden border border-white/50 dark:border-white/10 shadow-lg">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex-1 space-y-1.5">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-xl font-bold text-text-primary tracking-tight">{formData.name || "Event Title"}</h3>
+                    <span className="bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 px-2.5 py-0.5 rounded-lg text-[10px] font-bold">
+                      Active
+                    </span>
+                  </div>
+                  <p className="text-sm text-text-secondary leading-relaxed pr-6 line-clamp-2">
+                    {formData.description || "Publish event descriptions to welcome student registrations."}
                   </p>
-                )}
+                </div>
               </div>
-            </CardContent>
-          </Card>
+              
+              <div className="h-px bg-border/50 my-5" />
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center space-x-2.5 text-xs text-text-secondary">
+                  <Calendar className="h-4.5 w-4.5 text-primary shrink-0" />
+                  <span className="font-medium">
+                    Deadline: <strong className="text-text-primary">{formData.deadline ? new Date(formData.deadline).toLocaleDateString() : "No deadline specified"}</strong>
+                  </span>
+                </div>
+              </div>
+            </Card>
+          </div>
         )}
       </main>
     </div>

@@ -12,6 +12,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
   const { user, profile, loading } = useAuth();
   const location = useLocation();
 
+  console.log('[EventHub ProtectedRoute] Protected Route Check - Path:', location.pathname, 'Loading:', loading, 'User:', user?.email, 'Role:', profile?.role);
+
   // Show loading spinner while checking authentication
   if (loading) {
     return (
@@ -23,11 +25,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, adminOnly = f
 
   // Redirect to auth if not logged in
   if (!user) {
+    console.log('[EventHub ProtectedRoute] Redirecting to Auth - Unauthenticated access attempt to:', location.pathname);
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   // Redirect to dashboard if admin access is required but user is not admin
   if (adminOnly && profile?.role !== 'admin') {
+    console.log('[EventHub ProtectedRoute] Unauthorized Admin Access - Redirecting to Dashboard from:', location.pathname);
     return <Navigate to="/dashboard" replace />;
   }
 

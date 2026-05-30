@@ -22,6 +22,7 @@ export const useEvents = () => {
   const { session } = useAuth();
 
   const fetchEvents = async () => {
+    console.log('[EventHub Auth] DASHBOARD FETCH START');
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -34,7 +35,8 @@ export const useEvents = () => {
       setEvents(data as Event[] || []);
       setError(null);
     } catch (err: any) {
-      setError(err.message);
+      console.error('Error fetching events:', err);
+      setError(err.message || 'Failed to fetch events from database.');
     } finally {
       setLoading(false);
     }

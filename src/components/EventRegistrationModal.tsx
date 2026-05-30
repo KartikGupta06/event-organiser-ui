@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, User, Mail, Phone, BookOpen, Fingerprint, Award, AlertCircle, Sparkles } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { DynamicFormRenderer } from "./DynamicFormRenderer";
@@ -168,122 +168,163 @@ export const EventRegistrationModal = ({
     }
   };
 
-  const getProgress = () => {
-    const totalSteps = customForm ? 3 : 2;
-    return `Step ${step} of ${totalSteps}`;
-  };
+  const totalSteps = customForm ? 3 : 2;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Register for {eventName}</DialogTitle>
-          <DialogDescription>{getProgress()}</DialogDescription>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 border border-white/50 dark:border-white/10 shadow-2xl glass-panel">
+        <DialogHeader className="mb-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+            <span className="text-[10px] uppercase font-bold text-primary tracking-widest">Enrollment Wizard</span>
+          </div>
+          <DialogTitle className="text-2xl font-black text-text-primary tracking-tight">
+            Register for {eventName}
+          </DialogTitle>
+          <DialogDescription className="text-xs text-text-secondary">
+            Provide the required details to secure your verified student ticket.
+          </DialogDescription>
+
+          {/* Premium Progress Bar Indicator */}
+          <div className="pt-4 pb-2">
+            <div className="flex justify-between items-center text-[10px] uppercase font-bold text-text-secondary mb-2 tracking-wider">
+              <span>Progress</span>
+              <span>Step {step} of {totalSteps}</span>
+            </div>
+            <div className="w-full h-1.5 bg-secondary dark:bg-card rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-primary transition-all duration-500 rounded-full" 
+                style={{ width: `${(step / totalSteps) * 100}%` }}
+              />
+            </div>
+          </div>
         </DialogHeader>
 
         {/* Step 1: Profile Verification */}
         {step === 1 && (
-          <div className="space-y-4">
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Please verify your details. You can edit them if needed.
+          <div className="space-y-6">
+            <Alert className="bg-primary/5 border-primary/20 rounded-2xl p-4 flex gap-3 items-start">
+              <AlertCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <AlertDescription className="text-xs text-text-secondary leading-relaxed font-medium">
+                Verify your official registration details. You can update any fields directly before completing submission.
               </AlertDescription>
             </Alert>
 
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Full Name <span className="text-destructive">*</span></Label>
-                <Input
-                  value={profileData.full_name}
-                  onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
-                  className={profileErrors.full_name ? "border-destructive" : ""}
-                />
+            <div className="grid md:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Full Student Name <span className="text-destructive">*</span></Label>
+                <div className="relative">
+                  <User className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-text-tertiary" />
+                  <Input
+                    value={profileData.full_name}
+                    onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
+                    className={`pl-11 h-11 rounded-xl bg-white/50 dark:bg-black/10 border-border/80 ${profileErrors.full_name ? "border-destructive focus:ring-destructive/20" : ""}`}
+                  />
+                </div>
                 {profileErrors.full_name && (
-                  <p className="text-sm text-destructive">{profileErrors.full_name}</p>
+                  <p className="text-[10px] text-destructive font-medium mt-1">{profileErrors.full_name}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label>Email <span className="text-destructive">*</span></Label>
-                <Input
-                  type="email"
-                  value={profileData.email}
-                  onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
-                  className={profileErrors.email ? "border-destructive" : ""}
-                />
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Email Address <span className="text-destructive">*</span></Label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-text-tertiary" />
+                  <Input
+                    type="email"
+                    value={profileData.email}
+                    onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                    className={`pl-11 h-11 rounded-xl bg-white/50 dark:bg-black/10 border-border/80 ${profileErrors.email ? "border-destructive focus:ring-destructive/20" : ""}`}
+                  />
+                </div>
                 {profileErrors.email && (
-                  <p className="text-sm text-destructive">{profileErrors.email}</p>
+                  <p className="text-[10px] text-destructive font-medium mt-1">{profileErrors.email}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label>Phone Number <span className="text-destructive">*</span></Label>
-                <Input
-                  value={profileData.phone_number}
-                  onChange={(e) => setProfileData({ ...profileData, phone_number: e.target.value })}
-                  className={profileErrors.phone_number ? "border-destructive" : ""}
-                />
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Contact Number <span className="text-destructive">*</span></Label>
+                <div className="relative">
+                  <Phone className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-text-tertiary" />
+                  <Input
+                    value={profileData.phone_number}
+                    onChange={(e) => setProfileData({ ...profileData, phone_number: e.target.value })}
+                    placeholder="e.g. +91 9876543210"
+                    className={`pl-11 h-11 rounded-xl bg-white/50 dark:bg-black/10 border-border/80 ${profileErrors.phone_number ? "border-destructive focus:ring-destructive/20" : ""}`}
+                  />
+                </div>
                 {profileErrors.phone_number && (
-                  <p className="text-sm text-destructive">{profileErrors.phone_number}</p>
+                  <p className="text-[10px] text-destructive font-medium mt-1">{profileErrors.phone_number}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label>Branch <span className="text-destructive">*</span></Label>
-                <Input
-                  value={profileData.branch}
-                  onChange={(e) => setProfileData({ ...profileData, branch: e.target.value })}
-                  className={profileErrors.branch ? "border-destructive" : ""}
-                />
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Academic Branch <span className="text-destructive">*</span></Label>
+                <div className="relative">
+                  <BookOpen className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-text-tertiary" />
+                  <Input
+                    value={profileData.branch}
+                    placeholder="e.g. Computer Science"
+                    onChange={(e) => setProfileData({ ...profileData, branch: e.target.value })}
+                    className={`pl-11 h-11 rounded-xl bg-white/50 dark:bg-black/10 border-border/80 ${profileErrors.branch ? "border-destructive focus:ring-destructive/20" : ""}`}
+                  />
+                </div>
                 {profileErrors.branch && (
-                  <p className="text-sm text-destructive">{profileErrors.branch}</p>
+                  <p className="text-[10px] text-destructive font-medium mt-1">{profileErrors.branch}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label>Roll Number <span className="text-destructive">*</span></Label>
-                <Input
-                  value={profileData.roll_number}
-                  onChange={(e) => setProfileData({ ...profileData, roll_number: e.target.value })}
-                  className={profileErrors.roll_number ? "border-destructive" : ""}
-                />
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Roll Registration ID <span className="text-destructive">*</span></Label>
+                <div className="relative">
+                  <Fingerprint className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-text-tertiary" />
+                  <Input
+                    value={profileData.roll_number}
+                    placeholder="e.g. CSE-2024-001"
+                    onChange={(e) => setProfileData({ ...profileData, roll_number: e.target.value })}
+                    className={`pl-11 h-11 rounded-xl bg-white/50 dark:bg-black/10 border-border/80 ${profileErrors.roll_number ? "border-destructive focus:ring-destructive/20" : ""}`}
+                  />
+                </div>
                 {profileErrors.roll_number && (
-                  <p className="text-sm text-destructive">{profileErrors.roll_number}</p>
+                  <p className="text-[10px] text-destructive font-medium mt-1">{profileErrors.roll_number}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label>Academic Year <span className="text-destructive">*</span></Label>
-                <Input
-                  value={profileData.academic_year}
-                  onChange={(e) => setProfileData({ ...profileData, academic_year: e.target.value })}
-                  className={profileErrors.academic_year ? "border-destructive" : ""}
-                />
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold uppercase tracking-wider text-text-secondary">Academic Year <span className="text-destructive">*</span></Label>
+                <div className="relative">
+                  <Award className="absolute left-3.5 top-3.5 h-4.5 w-4.5 text-text-tertiary" />
+                  <Input
+                    value={profileData.academic_year}
+                    placeholder="e.g. 3rd Year"
+                    onChange={(e) => setProfileData({ ...profileData, academic_year: e.target.value })}
+                    className={`pl-11 h-11 rounded-xl bg-white/50 dark:bg-black/10 border-border/80 ${profileErrors.academic_year ? "border-destructive focus:ring-destructive/20" : ""}`}
+                  />
+                </div>
                 {profileErrors.academic_year && (
-                  <p className="text-sm text-destructive">{profileErrors.academic_year}</p>
+                  <p className="text-[10px] text-destructive font-medium mt-1">{profileErrors.academic_year}</p>
                 )}
               </div>
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <div className="flex justify-end gap-3 pt-4 border-t border-border/50">
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl h-11 px-5 text-xs font-bold">
                 Cancel
               </Button>
-              <Button onClick={handleNext}>
-                Next
+              <Button onClick={handleNext} className="bg-primary hover:bg-primary/95 text-white rounded-xl h-11 px-6 text-xs font-bold">
+                Continue to Questions
               </Button>
             </div>
           </div>
         )}
 
-        {/* Step 2: Custom Form */}
+        {/* Step 2: Custom Questionnaire Form */}
         {step === 2 && customForm && (
-          <div className="space-y-4">
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                This event requires additional information. Please fill out the form below.
+          <div className="space-y-6">
+            <Alert className="bg-primary/5 border-primary/20 rounded-2xl p-4 flex gap-3 items-start">
+              <AlertCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+              <AlertDescription className="text-xs text-text-secondary leading-relaxed font-medium">
+                This event requires additional registration questionnaires. Please respond to the inquiries below.
               </AlertDescription>
             </Alert>
 
@@ -294,65 +335,68 @@ export const EventRegistrationModal = ({
               errors={formErrors}
             />
 
-            <div className="flex justify-between gap-2">
-              <Button variant="outline" onClick={() => setStep(1)}>
-                Back
+            <div className="flex justify-between gap-3 pt-4 border-t border-border/50">
+              <Button variant="outline" onClick={() => setStep(1)} className="rounded-xl h-11 px-5 text-xs font-bold">
+                Back to Profile
               </Button>
-              <Button onClick={handleNext}>
-                Next
+              <Button onClick={handleNext} className="bg-primary hover:bg-primary/95 text-white rounded-xl h-11 px-6 text-xs font-bold">
+                Review Registration
               </Button>
             </div>
           </div>
         )}
 
-        {/* Step 3: Confirmation */}
+        {/* Step 3: Confirmation Summary */}
         {step === 3 && (
-          <div className="space-y-4">
-            <Alert className="bg-primary/10 border-primary">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              <AlertDescription>
-                Please review your registration details before submitting.
+          <div className="space-y-6">
+            <Alert className="bg-emerald-500/10 border-emerald-500/20 rounded-2xl p-4 flex gap-3 items-start">
+              <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+              <AlertDescription className="text-xs text-text-secondary leading-relaxed font-medium">
+                Double-check your credentials below. Confirming will secure your entrance ticket to the event.
               </AlertDescription>
             </Alert>
 
-            <div className="space-y-3">
-              <h3 className="font-semibold">Personal Information</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div><span className="text-text-secondary">Name:</span> {profileData.full_name}</div>
-                <div><span className="text-text-secondary">Email:</span> {profileData.email}</div>
-                <div><span className="text-text-secondary">Phone:</span> {profileData.phone_number}</div>
-                <div><span className="text-text-secondary">Branch:</span> {profileData.branch}</div>
-                <div><span className="text-text-secondary">Roll Number:</span> {profileData.roll_number}</div>
-                <div><span className="text-text-secondary">Year:</span> {profileData.academic_year}</div>
-              </div>
-            </div>
-
-            {customForm && Object.keys(customFormData).length > 0 && (
-              <div className="space-y-3">
-                <h3 className="font-semibold">Additional Information</h3>
-                <div className="space-y-2 text-sm">
-                  {customForm.schema.fields.map(field => (
-                    <div key={field.id}>
-                      <span className="text-text-secondary">{field.label}:</span>{' '}
-                      {customFormData[field.id]?.toString() || 'N/A'}
-                    </div>
-                  ))}
+            {/* Premium details plaque card */}
+            <div className="p-6 rounded-2xl bg-secondary/30 dark:bg-card/30 border border-border/80 space-y-4">
+              <div className="pb-3 border-b border-border/30">
+                <h4 className="text-[10px] uppercase font-bold text-primary tracking-widest mb-0.5">Verified Profile Details</h4>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2.5 text-xs">
+                  <div><span className="text-text-secondary font-medium mr-1.5">Name:</span> <strong className="text-text-primary">{profileData.full_name}</strong></div>
+                  <div><span className="text-text-secondary font-medium mr-1.5">Email:</span> <strong className="text-text-primary">{profileData.email}</strong></div>
+                  <div><span className="text-text-secondary font-medium mr-1.5">Phone:</span> <strong className="text-text-primary">{profileData.phone_number}</strong></div>
+                  <div><span className="text-text-secondary font-medium mr-1.5">Branch:</span> <strong className="text-text-primary">{profileData.branch}</strong></div>
+                  <div><span className="text-text-secondary font-medium mr-1.5">Roll ID:</span> <strong className="text-text-primary">{profileData.roll_number}</strong></div>
+                  <div><span className="text-text-secondary font-medium mr-1.5">Year:</span> <strong className="text-text-primary">{profileData.academic_year}</strong></div>
                 </div>
               </div>
-            )}
 
-            <div className="flex justify-between gap-2">
-              <Button variant="outline" onClick={() => setStep(customForm ? 2 : 1)}>
+              {customForm && Object.keys(customFormData).length > 0 && (
+                <div>
+                  <h4 className="text-[10px] uppercase font-bold text-primary tracking-widest mb-0.5">Custom Form Inquiries</h4>
+                  <div className="space-y-2 mt-2.5 text-xs">
+                    {customForm.schema.fields.map(field => (
+                      <div key={field.id} className="flex flex-col gap-0.5">
+                        <span className="text-text-secondary font-medium">{field.label}:</span>
+                        <strong className="text-text-primary">{customFormData[field.id]?.toString() || '—'}</strong>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-between gap-3 pt-4 border-t border-border/50">
+              <Button variant="outline" onClick={() => setStep(customForm ? 2 : 1)} className="rounded-xl h-11 px-5 text-xs font-bold">
                 Back
               </Button>
-              <Button onClick={handleSubmit} disabled={loading}>
+              <Button onClick={handleSubmit} disabled={loading} className="bg-gradient-primary hover:shadow-glow text-white rounded-xl h-11 px-6 text-xs font-bold">
                 {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
-                  </>
+                  <span className="flex items-center gap-1.5">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Issuing Ticket...
+                  </span>
                 ) : (
-                  "Confirm Registration"
+                  "Confirm & Secure Ticket"
                 )}
               </Button>
             </div>

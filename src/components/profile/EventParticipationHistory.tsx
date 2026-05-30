@@ -44,15 +44,17 @@ const EventParticipationHistory = () => {
 
         if (error) throw error;
 
-        const formattedEvents = data.map((reg: any) => ({
-          id: reg.events.id,
-          name: reg.events.name,
-          description: reg.events.description,
-          deadline: reg.events.deadline,
-          status: reg.events.status,
-          registered_at: reg.registered_at,
-          registration_status: reg.status,
-        }));
+        const formattedEvents = data
+          .filter((reg: any) => reg && reg.events)
+          .map((reg: any) => ({
+            id: reg.events.id,
+            name: reg.events.name,
+            description: reg.events.description,
+            deadline: reg.events.deadline,
+            status: reg.events.status,
+            registered_at: reg.registered_at,
+            registration_status: reg.status,
+          }));
 
         setEvents(formattedEvents);
       } catch (error) {

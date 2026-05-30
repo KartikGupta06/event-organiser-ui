@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Upload, Loader2, User } from 'lucide-react';
 
 const ProfilePictureUpload = () => {
-  const { profile, user } = useAuth();
+  const { profile, user, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(profile?.profile_picture_url || null);
@@ -73,6 +73,8 @@ const ProfilePictureUpload = () => {
         .eq('user_id', user.id);
 
       if (updateError) throw updateError;
+
+      await refreshProfile(); // Refresh context state
 
       setPreviewUrl(publicUrl);
       toast({
